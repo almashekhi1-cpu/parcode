@@ -1,0 +1,4 @@
+node_modules/
+*.db
+*.xlsx
+qrcode.png

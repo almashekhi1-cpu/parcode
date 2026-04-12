@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل البيانات</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 35px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #0f3460, #e94560);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .logo-icon svg { width: 36px; height: 36px; fill: white; }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #1a1a2e;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 30px;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e8e8e8;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      direction: rtl;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      color: #1a1a2e;
+    }
+
+    input:focus {
+      border-color: #0f3460;
+      box-shadow: 0 0 0 4px rgba(15,52,96,0.1);
+    }
+
+    input::placeholder { color: #bbb; }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #0f3460, #e94560);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    button:hover { opacity: 0.92; }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Success state */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .checkmark {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    .checkmark svg { width: 38px; height: 38px; stroke: white; fill: none; stroke-width: 3; }
+
+    .success-title {
+      font-size: 1.4rem;
+      color: #1a1a2e;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .success-msg { color: #666; font-size: 0.95rem; line-height: 1.6; }
+
+    .error-msg {
+      background: #fff0f0;
+      border: 1px solid #ffcdd2;
+      color: #c0392b;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.9rem;
+      text-align: center;
+      margin-bottom: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- Form -->
+    <div id="form-view">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        </div>
+        <h1>ورود الواحة الزراعية</h1>
+        <p class="subtitle">أدخل بياناتك</p>
+      </div>
+
+      <div class="error-msg" id="error-msg"></div>
+
+      <form id="myForm">
+        <div class="field">
+          <label for="name">الاسم الكامل</label>
+          <input type="text" id="name" name="name" placeholder="أدخل اسمك الكامل" required />
+        </div>
+        <div class="field">
+          <label for="phone">رقم الجوال</label>
+          <input type="tel" id="phone" name="phone" placeholder="05XXXXXXXX" required />
+        </div>
+        <button type="submit" id="submitBtn">إرسال</button>
+      </form>
+    </div>
+
+    <!-- Success -->
+    <div class="success-screen" id="success-view">
+      <div class="checkmark">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="success-title">شكراً تم تسجيل البيانات</div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('myForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('submitBtn');
+      const errorEl = document.getElementById('error-msg');
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+
+      errorEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'جاري الإرسال...';
+
+      try {
+        const res = await fetch('/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('form-view').style.display = 'none';
+          document.getElementById('success-view').style.display = 'block';
+        } else {
+          throw new Error(data.message || 'حدث خطأ');
+        }
+      } catch (err) {
+        errorEl.textContent = err.message || 'فشل الاتصال بالسيرفر';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'إرسال';
+      }
+    });
+  </script>
+</body>
+</html>
