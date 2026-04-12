@@ -1,7 +1,6 @@
 const express = require('express');
 const compression = require('compression');
 const xlsx = require('xlsx');
-const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -9,20 +8,20 @@ const os = require('os');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Setup SQLite database
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data.db');
-const db = new Database(DB_PATH);
+// Data storage (JSON file)
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS submissions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  )
-`);
+function loadData() {
+  if (!fs.existsSync(DATA_FILE)) return [];
+  try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch { return []; }
+}
 
-// Cache form HTML in memory at startup
+function saveData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+}
+
+// Cache form HTML in memory
 const formHTML = fs.readFileSync(path.join(__dirname, 'form.html'), 'utf8');
 
 app.use(compression());
@@ -39,26 +38,26 @@ app.get('/', (req, res) => {
 // Handle form submission
 app.post('/submit', (req, res) => {
   const { name, phone } = req.body;
-
   if (!name || !phone) {
     return res.status(400).json({ success: false, message: 'الاسم ورقم الجوال مطلوبان' });
   }
 
+  const data = loadData();
   const now = new Date().toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' });
-  db.prepare('INSERT INTO submissions (name, phone, created_at) VALUES (?, ?, ?)').run(name, phone, now);
+  data.push({ id: data.length + 1, name, phone, created_at: now });
+  saveData(data);
 
   console.log(`✅ تم حفظ: ${name} - ${phone}`);
   res.json({ success: true });
 });
 
-// Download all submissions as Excel
+// Download Excel
 app.get('/download', (req, res) => {
-  const rows = db.prepare('SELECT name AS الاسم, phone AS "رقم الجوال", created_at AS "التاريخ والوقت" FROM submissions').all();
+  const data = loadData();
+  const rows = data.map(r => ({ 'الاسم': r.name, 'رقم الجوال': r.phone, 'التاريخ والوقت': r.created_at }));
 
   const wb = xlsx.utils.book_new();
-  const ws = xlsx.utils.json_to_sheet(rows, {
-    header: ['الاسم', 'رقم الجوال', 'التاريخ والوقت']
-  });
+  const ws = xlsx.utils.json_to_sheet(rows, { header: ['الاسم', 'رقم الجوال', 'التاريخ والوقت'] });
   ws['!cols'] = [{ wch: 25 }, { wch: 20 }, { wch: 25 }];
   xlsx.utils.book_append_sheet(wb, ws, 'البيانات');
 
@@ -68,12 +67,12 @@ app.get('/download', (req, res) => {
   res.send(buf);
 });
 
-// Admin page to view submissions
+// Admin page
 app.get('/admin', (req, res) => {
-  const rows = db.prepare('SELECT * FROM submissions ORDER BY id DESC').all();
-  const total = rows.length;
+  const data = loadData();
+  const total = data.length;
 
-  const tableRows = rows.map(r => `
+  const tableRows = [...data].reverse().map(r => `
     <tr>
       <td>${r.id}</td>
       <td>${r.name}</td>
@@ -117,14 +116,11 @@ app.get('/admin', (req, res) => {
 </html>`);
 });
 
-// Get local IP
 function getLocalIP() {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
+      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
     }
   }
   return 'localhost';
