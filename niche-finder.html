@@ -474,13 +474,31 @@
       aspect-ratio: 16/9;
       position: relative;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
+      background: #111;
     }
-    .video-thumb-bg {
+    .video-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s;
+    }
+    .video-thumb:hover img { transform: scale(1.05); }
+    .video-thumb-overlay {
       position: absolute; inset: 0;
-      opacity: 0.15;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
     }
-    .video-thumb-emoji { position: relative; z-index: 1; }
+    .video-thumb-play {
+      position: absolute;
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      padding-left: 3px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .video-thumb:hover .video-thumb-play { opacity: 1; }
     .video-stat {
       font-size: 0.7rem;
       color: var(--text-dim);
@@ -721,7 +739,20 @@
   let filtersOpen = false;
 
   const COLORS = ['#7c3aed','#0891b2','#059669','#dc2626','#d97706','#7c3aed','#db2777','#0284c7'];
-  const EMOJIS = ['🎬','📱','💡','🌟','🔥','💰','📊','🎓','🎮','🍳','✈️','💪','📰','🎵','🏆','🤖'];
+
+  // كلمات بحث Unsplash حسب نوع المحتوى
+  const THUMB_KEYWORDS = [
+    'youtube,video,content', 'technology,digital', 'cooking,food,arabic',
+    'sports,fitness', 'business,money', 'education,learning',
+    'travel,adventure', 'gaming,controller', 'music,studio',
+    'health,wellness', 'fashion,style', 'nature,landscape',
+    'motivation,success', 'science,research', 'art,creative'
+  ];
+
+  function getThumbUrl(keyword, seed) {
+    const q = encodeURIComponent(keyword || 'youtube video');
+    return `https://picsum.photos/seed/${seed}/320/180`;
+  }
 
   // ===== FILTER TOGGLE =====
   function toggleFilters() {
@@ -808,9 +839,9 @@
 
     grid.innerHTML = niches.map((n, i) => {
       const color = COLORS[i % COLORS.length];
-      const emoji1 = EMOJIS[i % EMOJIS.length];
-      const emoji2 = EMOJIS[(i + 3) % EMOJIS.length];
       const initials = (n.name || '؟').charAt(0);
+      const thumb1 = getThumbUrl(n.keywords?.[0], `${i}-a-${n.name}`);
+      const thumb2 = getThumbUrl(n.keywords?.[1], `${i}-b-${n.name}`);
 
       const compIcon = n.competition === 'منخفض' ? '🟢' : n.competition === 'متوسط' ? '🟡' : '🔴';
       const revIcon  = n.revenue === 'عالي' ? '💰' : n.revenue === 'متوسط' ? '💵' : '💸';
@@ -855,15 +886,17 @@
         <div class="videos-row">
           <div>
             <div class="video-thumb">
-              <div class="video-thumb-bg" style="background:${color}"></div>
-              <span class="video-thumb-emoji">${emoji1}</span>
+              <img src="${thumb1}" alt="${idea1}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${i}a/320/180'"/>
+              <div class="video-thumb-overlay"></div>
+              <div class="video-thumb-play">▶</div>
             </div>
             <div class="video-stat"><strong>حديث</strong> · ${idea1.substring(0,28)}${idea1.length>28?'…':''}</div>
           </div>
           <div>
             <div class="video-thumb">
-              <div class="video-thumb-bg" style="background:${COLORS[(i+2)%COLORS.length]}"></div>
-              <span class="video-thumb-emoji">${emoji2}</span>
+              <img src="${thumb2}" alt="${idea2}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${i}b/320/180'"/>
+              <div class="video-thumb-overlay"></div>
+              <div class="video-thumb-play">▶</div>
             </div>
             <div class="video-stat"><strong>الأفضل</strong> · ${idea2.substring(0,28)}${idea2.length>28?'…':''}</div>
           </div>
