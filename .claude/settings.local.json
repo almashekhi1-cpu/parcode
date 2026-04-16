@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(node server.js)",
+      "Bash(curl -s -X POST http://localhost:3000/submit -H \"Content-Type: application/json\" -d '{\"name\":\"تجربة\",\"phone\":\"0500000000\"}')",
+      "Bash(netstat -ano)",
+      "Read(//tmp/**)",
+      "Bash(jobs)",
+      "Bash(node -e ':*)",
+      "Bash(pkill -f \"node server.js\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(taskkill /PID 24772 /F)",
+      "Bash(cmd //c \"taskkill /PID 24772 /F\")",
+      "Bash(railway --version)",
+      "Bash(npm config:*)",
+      "Bash(node \"C:/Users/User/AppData/Roaming/npm/node_modules/@railway/cli/bin/railway.js\" --version)",
+      "Bash(node \"C:/Users/User/AppData/Roaming/npm/node_modules/@railway/cli/bin/railway.js\" login)",
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "WebFetch(domain:app.tubegen.ai)",
+      "WebSearch",
+      "WebFetch(domain:outlierkit.com)",
+      "Bash(npx kill-port:*)"
+    ]
+  }
+}
