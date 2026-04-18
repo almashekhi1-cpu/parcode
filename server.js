@@ -13,6 +13,11 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 
+// Create data directory if it doesn't exist
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
 function loadData() {
   if (!fs.existsSync(DATA_FILE)) return [];
   try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch { return []; }
