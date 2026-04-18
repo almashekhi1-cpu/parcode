@@ -2,3 +2,4 @@ node_modules/
 *.db
 *.xlsx
 qrcode.png
+submissions.json
