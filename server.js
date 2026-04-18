@@ -4,7 +4,6 @@ const xlsx = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const Anthropic = require('@anthropic-ai/sdk');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -71,74 +70,6 @@ app.get('/download', (req, res) => {
   res.setHeader('Content-Disposition', 'attachment; filename="submissions.xlsx"');
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.send(buf);
-});
-
-// Serve niche finder page
-app.get('/niche-finder', (req, res) => {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.sendFile(path.join(__dirname, 'niche-finder.html'));
-});
-
-// Niche Finder API
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-app.post('/api/niche-finder', async (req, res) => {
-  const { interest, contentType, competition, language, extra } = req.body;
-  if (!interest) return res.status(400).json({ success: false, message: 'الرجاء إدخال اهتماماتك' });
-
-  const competitionFilter = competition === 'low' ? 'منخفض فقط' :
-                            competition === 'medium' ? 'متوسط' :
-                            competition === 'low-medium' ? 'منخفض أو متوسط' : 'أي مستوى';
-
-  const contentTypeAr = { educational: 'تعليمي', entertainment: 'ترفيهي', reviews: 'مراجعات',
-    tutorials: 'شروحات تقنية', motivation: 'تحفيزي', news: 'أخبار وتحليل', faceless: 'قنوات بدون وجه', any: 'أي نوع' };
-
-  const languageMap = { arabic: 'السوق العربي العام', gulf: 'السوق الخليجي', egyptian: 'السوق المصري', levant: 'السوق الشامي', english: 'السوق الإنجليزي العالمي' };
-  const targetMarket = languageMap[language] || 'السوق العربي العام';
-  const isEnglish = language === 'english';
-
-  const prompt = `أنت خبير في يوتيوب${isEnglish ? ' والمحتوى الإنجليزي العالمي' : ' والمحتوى العربي'}. مهمتك إيجاد أفضل النيشات المناسبة لليوتيوب.
-
-المعطيات:
-- الاهتمامات: ${interest}
-- نوع المحتوى: ${contentTypeAr[contentType] || 'أي نوع'}
-- مستوى المنافسة المقبول: ${competitionFilter}
-- السوق المستهدف: ${targetMarket}
-${extra ? `- معلومات إضافية: ${extra}` : ''}
-
-أعطني 6 نيشات يوتيوب مناسبة للسوق العربي. أجب بـ JSON فقط بهذا الشكل بدون أي نص آخر:
-{
-  "niches": [
-    {
-      "name": "اسم النيش بالعربي",
-      "description": "وصف مختصر للنيش وسبب نجاحه (2-3 جمل)",
-      "competition": "منخفض أو متوسط أو عالي",
-      "revenue": "عالي أو متوسط أو منخفض",
-      "audience": "وصف الجمهور المستهدف",
-      "ideas": ["فكرة فيديو 1", "فكرة فيديو 2", "فكرة فيديو 3", "فكرة فيديو 4"],
-      "keywords": ["كلمة1", "كلمة2", "كلمة3", "كلمة4", "كلمة5"]
-    }
-  ]
-}`;
-
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
-    });
-
-    const raw = message.content[0].text.trim();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return res.json({ success: false, message: 'خطأ في تحليل الرد، حاول مرة أخرى' });
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    res.json({ success: true, niches: parsed.niches });
-  } catch (err) {
-    console.error('Niche finder error:', err.message);
-    if (err.status === 401) return res.json({ success: false, message: 'مفتاح API غير صحيح، راجع إعدادات ANTHROPIC_API_KEY' });
-    res.json({ success: false, message: 'حدث خطأ في الذكاء الاصطناعي، حاول مرة أخرى' });
-  }
 });
 
 // Admin page
