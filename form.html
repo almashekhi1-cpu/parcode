@@ -90,6 +90,45 @@
 
     input::placeholder { color: #bbb; }
 
+    .phone-wrapper {
+      display: flex;
+      align-items: center;
+      border: 2px solid #e8e8e8;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .phone-wrapper:focus-within {
+      border-color: #0f3460;
+      box-shadow: 0 0 0 4px rgba(15,52,96,0.1);
+    }
+
+    .phone-prefix {
+      background: #f4f6f9;
+      padding: 14px 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      border-left: 2px solid #e8e8e8;
+      white-space: nowrap;
+      direction: ltr;
+    }
+
+    .phone-wrapper input {
+      border: none;
+      border-radius: 0;
+      box-shadow: none !important;
+      flex: 1;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .phone-wrapper input:focus {
+      border: none;
+      box-shadow: none;
+    }
+
     button {
       width: 100%;
       padding: 15px;
@@ -179,7 +218,10 @@
         </div>
         <div class="field">
           <label for="phone">رقم الجوال</label>
-          <input type="tel" id="phone" name="phone" placeholder="05XXXXXXXX" required />
+          <div class="phone-wrapper">
+            <span class="phone-prefix">🇸🇦 +966</span>
+            <input type="tel" id="phone" name="phone" placeholder="5XXXXXXXX" maxlength="9" required />
+          </div>
         </div>
         <button type="submit" id="submitBtn">إرسال</button>
       </form>
@@ -201,7 +243,7 @@
       const btn = document.getElementById('submitBtn');
       const errorEl = document.getElementById('error-msg');
       const name = document.getElementById('name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
+      const phone = '+966' + document.getElementById('phone').value.trim();
 
       errorEl.style.display = 'none';
       btn.disabled = true;
